@@ -6,7 +6,7 @@
 После правок в platform/curriculum.py запускать обязательно — иначе на сайте
 останется старая программа.
 """
-import json, os, sys
+import json, os, shutil, sys
 import duckdb
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -16,6 +16,24 @@ from curriculum import UNITS
 TABLES = ["users", "subscriptions", "payments", "events", "marketing_spend"]
 WEB = os.path.join(BASE, "web")
 os.makedirs(os.path.join(WEB, "data"), exist_ok=True)
+
+STATIC = os.path.join(BASE, "platform", "static")
+
+# ── интерфейс: одна кодовая база на обе версии ──────────────────────────
+# Вёрстка, дизайн-система и экраны лежат в platform/static и копируются
+# сюда как есть. Отличается только слой данных: в браузере вместо
+# серверного api.js подставляется api.web.js (DuckDB-WASM + localStorage).
+for folder in ("css", "js", "fonts"):
+    dst = os.path.join(WEB, folder)
+    shutil.rmtree(dst, ignore_errors=True)
+    shutil.copytree(os.path.join(STATIC, folder), dst)
+for name in ("index.html", "logo.svg"):
+    shutil.copy(os.path.join(STATIC, name), os.path.join(WEB, name))
+os.replace(os.path.join(WEB, "js", "api.web.js"), os.path.join(WEB, "js", "api.js"))
+for stale in ("app.js", "app.css"):
+    old = os.path.join(WEB, stale)
+    if os.path.exists(old): os.remove(old)
+print("интерфейс      скопирован из platform/static")
 
 con = duckdb.connect(os.path.join(BASE, "data", "saas.duckdb"), read_only=True)
 

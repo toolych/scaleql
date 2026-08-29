@@ -222,18 +222,20 @@ class H(BaseHTTPRequestHandler):
         if path in ("/", "/index.html"):
             return self._send(200, open(os.path.join(STATIC, "index.html"), "rb").read(),
                               "text/html; charset=utf-8")
-        if path.startswith("/static/"):
-            fp = os.path.normpath(os.path.join(STATIC, path[len("/static/"):]))
+        if not path.startswith("/api/"):
+            # Пути в вёрстке относительные, чтобы та же сборка работала
+            # и на статическом хостинге. /static/ оставлен для совместимости.
+            rel = path[len("/static/"):] if path.startswith("/static/") else path.lstrip("/")
+            fp = os.path.normpath(os.path.join(STATIC, rel))
             if fp.startswith(STATIC) and os.path.isfile(fp):
                 ctype = mimetypes.guess_type(fp)[0] or "application/octet-stream"
                 if fp.endswith(".woff2"): ctype = "font/woff2"
                 return self._send(200, open(fp, "rb").read(), ctype)
-            return self._send(404, {"error": "not found"})
         if path == "/api/course":
             st = load_state()
             return self._send(200, {"units": course_payload(st), "schema": schema(),
                                     "state": public_state(st),
-                                    "today": today(), "tg_ready": bool(TG_TOKEN)})
+                                    "today": today(), "tg_ready": bool(TG_TOKEN), "mode": "server"})
         if path == "/api/state":
             return self._send(200, public_state(load_state()))
         self._send(404, {"error": "not found"})
