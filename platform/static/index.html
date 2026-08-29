@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScaleQL — тренажёр аналитика</title>
+<link rel="icon" href="/static/logo.svg">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<header>
+  <div class="brand" onclick="show('map')">
+    <img src="/static/logo.svg" alt="">
+    <b>Scale<i>QL</i></b>
+  </div>
+  <div class="tabs">
+    <button class="tab" data-v="map" onclick="show('map')">Карта</button>
+    <button class="tab" data-v="stats" onclick="show('stats')">Прогресс</button>
+  </div>
+  <span class="spacer"></span>
+  <span class="stat flame" id="streak" title="дней подряд">🔥 0</span>
+  <span class="stat xp" id="xp" title="опыт">0 <small>XP</small></span>
+</header>
+<div id="view"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

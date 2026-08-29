@@ -1,0 +1,7 @@
+#!/bin/zsh
+# Запуск SQL по учебной базе: sql/q "SELECT ..."
+cd "$(dirname "$0")/.." && .venv/bin/python -c "
+import duckdb, sys
+con = duckdb.connect('data/saas.duckdb', read_only=True)
+print(con.sql(sys.argv[1]))
+" "$1"

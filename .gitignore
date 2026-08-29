@@ -1,0 +1,12 @@
+.env
+.venv/
+platform/state.json
+platform/reminder.log
+__pycache__/
+*.pyc
+.DS_Store
+resume*.pdf
+handoff.md
+progress.md
+errors.md
+CLAUDE.md
