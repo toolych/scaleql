@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "scaleql",
+      "runtimeExecutable": ".venv/bin/python",
+      "runtimeArgs": ["platform/app.py"],
+      "port": 8777
+    }
+  ]
+}

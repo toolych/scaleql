@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScaleQL — тренажёр аналитика</title>
+<meta name="description" content="Тренажёр SQL для аналитика данных: лекции, задачи с автопроверкой и тесты поверх настоящей базы.">
+<link rel="icon" href="logo.svg">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div id="boot"><div class="in">
+  <img src="logo.svg" alt="">
+  <b>ScaleQL</b>
+  <p id="bootMsg">Загружаю движок базы. Первый раз это около 6 МБ, дальше открывается из кэша мгновенно.</p>
+  <div class="bar"><i></i></div>
+</div></div>
+<header>
+  <div class="brand" onclick="show('map')">
+    <img src="logo.svg" alt="">
+    <b>Scale<i>QL</i></b>
+  </div>
+  <div class="tabs">
+    <button class="tab" data-v="map" onclick="show('map')">Карта</button>
+    <button class="tab" data-v="stats" onclick="show('stats')">Прогресс</button>
+  </div>
+  <span class="spacer"></span>
+  <span class="stat flame" id="streak" title="дней подряд">🔥 0</span>
+  <span class="stat xp" id="xp" title="опыт">0 <small>XP</small></span>
+</header>
+<div id="view"></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>

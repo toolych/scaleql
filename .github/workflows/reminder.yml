@@ -1,0 +1,26 @@
+name: Напоминание о занятии
+
+on:
+  schedule:
+    - cron: "0 17 * * *"   # 20:00 МСК каждый день
+  workflow_dispatch:        # можно запустить вручную из вкладки Actions
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Отправить сообщение в Telegram
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT: ${{ secrets.TG_CHAT }}
+          SITE: ${{ vars.SITE_URL }}
+        run: |
+          DAY=$(date +%u)
+          case "$DAY" in
+            6|7) TEXT="Выходной — но серия не различает будни и выходные. Две задачи, 20 минут: ${SITE:-https://scaleql.pages.dev}" ;;
+            *)   TEXT="Время SQL. Двадцать минут сейчас дешевле, чем воскресный марафон: ${SITE:-https://scaleql.pages.dev}" ;;
+          esac
+          curl -sS -X POST "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+            -d chat_id="${TG_CHAT}" \
+            -d disable_web_page_preview=true \
+            --data-urlencode text="$TEXT" | head -c 200
