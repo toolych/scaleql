@@ -68,6 +68,7 @@ function openUnit(i){
         <button class="btn sm" onclick="show('map')">К карте</button>
         <button class="btn sm" id="runB">Выполнить</button>
         <button class="btn sm pri" id="checkB">Проверить</button>
+        <button class="btn sm" id="copyB" title="Скопировать задачу, запрос и ошибку — вставить в чат">Разбор</button>
       </div>
       <div id="edWrap"><pre id="hl"><code></code></pre><textarea id="ta" spellcheck="false"
         placeholder="Пиши запрос здесь. Проверить — Cmd+Enter."></textarea></div>
@@ -157,6 +158,16 @@ function bindEditor(){
     if ((e.metaKey||e.ctrlKey) && e.key === "Enter"){ e.preventDefault(); curTask ? doCheck() : doRun(); }
   });
   $("runB").onclick = doRun; $("checkB").onclick = doCheck;
+  $("copyB").onclick = async () => {
+    const u = C.units[unitIdx], b = curTask ? u.blocks.find(x => x.id === curTask) : null;
+    const txt = [`Юнит: ${u.title}`,
+      b ? `Задача: ${b.prompt.replace(/<[^>]+>/g, "")}` : "Свободный запрос",
+      `Мой запрос:\n${$("ta").value}`,
+      lastCtx.message ? `Ответ платформы: ${lastCtx.message}` : "",
+      lastCtx.error ? `Ошибка: ${lastCtx.error}` : ""].filter(Boolean).join("\n\n");
+    await navigator.clipboard.writeText(txt);
+    toast("Скопировано — вставь в чат");
+  };
 }
 function renderSel(){
   const u = C.units[unitIdx], sel = $("taskSel");
@@ -259,7 +270,8 @@ function renderStats(){
         <input type="number" id="goal" value="${S.goal}" min="10" max="200" step="10">
         <button class="btn sm pri" onclick="saveGoal()">Сохранить</button></p></div>
     <div class="sect"><h3>Последние 14 дней</h3>
-      <div class="days">${days.map(d=>`<div class="${d.xp?"":"z"}" style="height:${Math.max(3, Math.round(100*d.xp/mx))}%" title="${d.k}: ${d.xp} XP"></div>`).join("")}</div>
+      <div class="days">${days.map(d=>`<div class="col ${d.xp?"":"z"}" title="${d.k}: ${d.xp} XP">
+        <b>${d.xp||""}</b><i style="height:${Math.max(4, Math.round(88*d.xp/mx))}%"></i></div>`).join("")}</div>
       <div style="display:flex;gap:5px;color:var(--dim);font-size:12px">${days.map(d=>`<span style="flex:1;text-align:center">${d.lbl}</span>`).join("")}</div></div>
     <div class="sect"><h3>Напоминания в Telegram</h3>
       <p>${S.tg.chat_id ? "Подключено. Бот пишет, если за день не набрана дневная цель." :

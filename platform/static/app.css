@@ -155,13 +155,19 @@ table.res tr:hover td{background:#12151e}
 /* ── прогресс/статистика ───────────────────────────────── */
 .stats{max-width:760px;margin:0 auto;padding:34px 20px 90px}
 .stats h1{font-size:26px;font-weight:800;margin:0 0 22px;letter-spacing:-.015em}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:26px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
+@media (max-width:780px){.grid{grid-template-columns:repeat(2,1fr)}}
 .kpi{padding:17px 19px;border-radius:var(--r);background:var(--surf);border:1px solid var(--line)}
 .kpi b{display:block;font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
 .kpi span{color:var(--dim);font-size:13.5px;font-weight:700}
-.days{display:flex;gap:5px;align-items:flex-end;height:120px;margin:8px 0 6px}
-.days div{flex:1;background:var(--blue);border-radius:6px 6px 3px 3px;min-height:3px;position:relative}
-.days div.z{background:var(--surf3)}
+.days{display:flex;gap:6px;align-items:flex-end;height:130px;margin:14px 0 8px;
+  border-bottom:1px solid var(--line);padding-bottom:2px}
+.days .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;height:100%}
+.days .col b{font-size:11.5px;font-weight:800;color:var(--dim)}
+.days .col i{display:block;width:100%;background:var(--blue);border-radius:6px 6px 2px 2px;min-height:4px}
+.days .col.z i{background:var(--surf3)}
+.days .col.z b{color:var(--dim2)}
+
 .sect{padding:19px;border-radius:var(--r);background:var(--surf);border:1px solid var(--line);margin-bottom:16px}
 .sect h3{margin:0 0 12px;font-size:17px;font-weight:800}
 .sect p{color:var(--dim);margin:0 0 13px;font-size:14.3px}

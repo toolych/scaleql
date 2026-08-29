@@ -2,9 +2,11 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "trainer",
+      "name": "scaleql",
       "runtimeExecutable": "/Users/toolie/Documents/ETUDIE/.venv/bin/python",
-      "runtimeArgs": ["/Users/toolie/Documents/ETUDIE/platform/server.py"],
+      "runtimeArgs": [
+        "/Users/toolie/Documents/ETUDIE/platform/app.py"
+      ],
       "port": 8777
     }
   ]
