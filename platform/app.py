@@ -153,7 +153,23 @@ def quiz(qid, choice):
             "xp": xp, "state": public_state(st)}
 
 def public_state(st):
-    return {k: st[k] for k in ("xp", "tasks", "quizzes", "answers", "streak", "goal", "history", "tg")}
+    return {k: st[k] for k in ("xp", "tasks", "quizzes", "answers", "streak", "goal", "history", "tg", "log")}
+
+def course_payload(st):
+    """Курс для клиента: без эталонных решений и без правильных ответов
+    на непройденные вопросы — иначе решение видно в инструментах разработчика."""
+    out = []
+    for u in UNITS:
+        blocks = []
+        for b in u["blocks"]:
+            b = dict(b)
+            if b["type"] == "task":
+                b.pop("ref", None)
+            elif b["type"] == "quiz" and st["quizzes"].get(b["id"]) != "done":
+                b.pop("answer", None)
+            blocks.append(b)
+        out.append({**u, "blocks": blocks})
+    return out
 
 def schema():
     con = duckdb.connect(DB, read_only=True)
@@ -214,8 +230,9 @@ class H(BaseHTTPRequestHandler):
                 return self._send(200, open(fp, "rb").read(), ctype)
             return self._send(404, {"error": "not found"})
         if path == "/api/course":
-            return self._send(200, {"units": UNITS, "schema": schema(),
-                                    "state": public_state(load_state()),
+            st = load_state()
+            return self._send(200, {"units": course_payload(st), "schema": schema(),
+                                    "state": public_state(st),
                                     "today": today(), "tg_ready": bool(TG_TOKEN)})
         if path == "/api/state":
             return self._send(200, public_state(load_state()))

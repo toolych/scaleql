@@ -2,26 +2,55 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#10131c">
 <title>ScaleQL — тренажёр аналитика</title>
 <link rel="icon" href="/static/logo.svg">
-<link rel="stylesheet" href="/static/app.css">
+<link rel="preload" href="/static/fonts/nunito-cyr.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/css/tokens.css">
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/components.css">
+<link rel="stylesheet" href="/static/css/views.css">
 </head>
 <body>
-<header>
-  <div class="brand" onclick="show('map')">
+<a class="skip-link" href="#view">Перейти к содержимому</a>
+
+<header class="app-header">
+  <button class="brand" id="brandBtn" aria-label="ScaleQL, на карту курса">
     <img src="/static/logo.svg" alt="">
-    <b>Scale<i>QL</i></b>
-  </div>
-  <div class="tabs">
-    <button class="tab" data-v="map" onclick="show('map')">Карта</button>
-    <button class="tab" data-v="stats" onclick="show('stats')">Прогресс</button>
-  </div>
+    <span>Scale<i>QL</i></span>
+  </button>
+
+  <nav class="nav" aria-label="Разделы">
+    <button class="nav__item" data-view="map">Карта</button>
+    <button class="nav__item" data-view="stats">Прогресс</button>
+  </nav>
+
   <span class="spacer"></span>
-  <span class="stat flame" id="streak" title="дней подряд">🔥 0</span>
-  <span class="stat xp" id="xp" title="опыт">0 <small>XP</small></span>
+
+  <div class="hud">
+    <span class="stat stat--streak" id="hudStreak" title="Дней подряд с занятиями">
+      <span aria-hidden="true">🔥</span><b>0</b><span class="visually-hidden">дней подряд</span>
+    </span>
+    <span class="stat stat--xp" id="hudXp" title="Накопленный опыт">
+      <b>0</b><small>XP</small>
+    </span>
+    <button class="icon-btn" id="settingsBtn" aria-label="Настройки" title="Настройки">⚙</button>
+  </div>
 </header>
-<div id="view"></div>
-<script src="/static/app.js"></script>
+
+<main id="view" tabindex="-1"></main>
+
+<nav class="tabbar" aria-label="Разделы">
+  <button class="tabbar__item" data-view="map"><em aria-hidden="true">🗺</em>Карта</button>
+  <button class="tabbar__item" data-view="stats"><em aria-hidden="true">📈</em>Прогресс</button>
+  <button class="tabbar__item" data-view="settings"><em aria-hidden="true">⚙</em>Настройки</button>
+</nav>
+
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<dialog class="dialog" id="dialog" aria-labelledby="dialogTitle"></dialog>
+
+<script type="module" src="/static/js/app.js"></script>
 </body>
 </html>
