@@ -4,7 +4,7 @@
 .app-header{
   flex:0 0 auto; display:flex; align-items:center; gap:var(--sp-4);
   height:var(--header-h); padding:0 var(--sp-4);
-  border-bottom:1px solid var(--line); background:var(--ink-950);
+  border-bottom:1px solid var(--line); background:var(--ink-900);
 }
 .brand{
   display:flex; align-items:center; gap:var(--sp-2);
@@ -50,15 +50,17 @@
 
 /* Программа курса: нумерованный список, а не тропинка из кружков.
    Читается как оглавление учебника, а не как игровое поле.        */
-.path{ list-style:none; margin:0; padding:0; border-top:1px solid var(--line) }
-.path__i{ border-bottom:1px solid var(--line) }
+.path{ list-style:none; margin:0; padding:0;
+  background:var(--ink-900); border:1px solid var(--line);
+  border-radius:var(--r); box-shadow:var(--shadow); overflow:hidden }
+.path__i + .path__i{ border-top:1px solid var(--line) }
 .path__b{
   display:grid; grid-template-columns:34px 1fr 132px; align-items:center; gap:var(--sp-4);
   width:100%; padding:var(--sp-4) var(--sp-3) var(--sp-4) 0; text-align:left;
   border-left:2px solid transparent;
   transition:background var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
 }
-.path__b:hover{ background:var(--ink-900) }
+.path__b:hover{ background:var(--ink-800) }
 .path__n{
   padding-left:var(--sp-3);
   font-family:var(--mono); font-size:var(--fs-xs); color:var(--tx-3);
@@ -87,7 +89,7 @@
 .unit__bar{
   flex:0 0 auto; display:flex; align-items:center; gap:var(--sp-3);
   height:44px; padding:0 var(--sp-2) 0 var(--sp-1);
-  border-bottom:1px solid var(--line); background:var(--ink-950);
+  border-bottom:1px solid var(--line); background:var(--ink-900);
 }
 .unit__t{ min-width:0; display:flex; align-items:baseline; gap:var(--sp-3) }
 /* Название важнее счётчика: оно жмётся многоточием, счётчик уходит первым. */
@@ -99,7 +101,7 @@
 /* Шкала шагов: тонкие сегменты во всю ширину. Видно и сколько
    пройдено, и сколько осталось, без единой цифры.               */
 .rail{ flex:0 0 auto; display:flex; gap:2px; padding:0 var(--sp-3);
-  background:var(--ink-950); border-bottom:1px solid var(--line) }
+  background:var(--ink-900); border-bottom:1px solid var(--line) }
 .rail__s{ flex:1 1 auto; height:18px; padding:0; position:relative }
 .rail__s::before{
   content:""; position:absolute; left:0; right:0; top:7px; height:3px;
@@ -136,12 +138,12 @@
 .step__skip{ margin-top:var(--sp-6) }
 
 /* Пример запроса: код и две служебные кнопки под ним. */
-.ex{ border:1px solid var(--line); border-radius:var(--r); overflow:hidden }
+.ex{ border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); overflow:hidden }
 .ex .code{ border:0; border-radius:0 }
 .ex__foot{
   display:flex; align-items:center; gap:var(--sp-1);
   padding:var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-3);
-  border-top:1px solid var(--line); background:var(--ink-900);
+  border-top:1px solid var(--line); background:var(--ink-850);
 }
 .ex__note{ flex:1; min-width:0; color:var(--tx-3); font-size:var(--fs-xs); line-height:1.5 }
 .ex__out{ border-top:1px solid var(--line); padding:var(--sp-3) }
@@ -165,7 +167,7 @@
 }
 
 /* ══ ВЕРСТАК ══════════════════════════════════════════════ */
-.bench{ display:flex; flex-direction:column; min-width:0; min-height:0; background:var(--ink-950) }
+.bench{ display:flex; flex-direction:column; min-width:0; min-height:0; background:var(--ink-900) }
 .bench__head{
   flex:0 0 auto; display:flex; align-items:center; gap:var(--sp-2);
   height:36px; padding:0 var(--sp-2) 0 var(--sp-4);
@@ -192,7 +194,7 @@
 .bench__out > * + *{ margin-top:var(--sp-3) }
 
 .schema{ flex:0 0 auto; display:flex; flex-direction:column; max-height:34%;
-  padding:0 var(--sp-4); background:var(--ink-950) }
+  padding:0 var(--sp-4); background:var(--ink-900) }
 .schema .disc__body{ overflow-y:auto }
 .schema__t{ margin-bottom:var(--sp-3) }
 .schema__n{
@@ -207,7 +209,7 @@
 .acts{
   flex:0 0 auto; display:flex; align-items:center; gap:var(--sp-3);
   padding:var(--sp-3) var(--sp-4) calc(var(--sp-3) + var(--safe-b));
-  border-top:1px solid var(--line); background:var(--ink-950);
+  border-top:1px solid var(--line); background:var(--ink-900);
 }
 .acts__i{ min-width:0; display:flex; flex-direction:column; gap:2px }
 .acts__i b{ font-size:var(--fs-sm); font-weight:600 }
@@ -258,11 +260,12 @@
 /* ══ ПРОГРЕСС ═════════════════════════════════════════════ */
 .kpis{
   display:grid; grid-template-columns:repeat(4,1fr);
-  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  background:var(--ink-900); border:1px solid var(--line);
+  border-radius:var(--r); box-shadow:var(--shadow);
   margin-bottom:var(--sp-7);
 }
-.kpi{ padding:var(--sp-4) var(--sp-4) var(--sp-4) 0 }
-.kpi + .kpi{ padding-left:var(--sp-4); border-left:1px solid var(--line) }
+.kpi{ padding:var(--sp-4) }
+.kpi + .kpi{ border-left:1px solid var(--line) }
 .kpi b{
   display:block; font-family:var(--mono); font-variant-numeric:tabular-nums;
   font-size:22px; font-weight:500; letter-spacing:-.015em; line-height:1.2;
@@ -287,9 +290,12 @@
   font-size:10px; color:var(--tx-3) }
 .chart__x span.is-today{ color:var(--acc) }
 
-.mastery{ list-style:none; margin:0; padding:0; border-top:1px solid var(--line) }
+.mastery{ list-style:none; margin:0; padding:0 var(--sp-4);
+  background:var(--ink-900); border:1px solid var(--line);
+  border-radius:var(--r); box-shadow:var(--shadow) }
 .mastery li{ display:grid; grid-template-columns:26px 1fr 64px 46px; align-items:center;
-  gap:var(--sp-3); padding:var(--sp-3) 0; border-bottom:1px solid var(--line) }
+  gap:var(--sp-3); padding:var(--sp-3) 0 }
+.mastery li + li{ border-top:1px solid var(--line) }
 .mastery__n{ font-family:var(--mono); font-size:var(--fs-xs); color:var(--tx-3) }
 .mastery li.is-done .mastery__n{ color:var(--ok) }
 .mastery__t{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
@@ -328,7 +334,7 @@
   .tabbar{
     flex:0 0 auto; display:flex; align-items:stretch;
     height:calc(var(--tabbar-h) + var(--safe-b)); padding-bottom:var(--safe-b);
-    border-top:1px solid var(--line); background:var(--ink-950);
+    border-top:1px solid var(--line); background:var(--ink-900);
   }
   .tabbar__item{
     flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -342,7 +348,7 @@
   .hud{ gap:var(--sp-3) }
 
   .kpis{ grid-template-columns:repeat(2,1fr) }
-  .kpi:nth-child(odd){ padding-left:0; border-left:0 }
+  .kpi:nth-child(odd){ border-left:0 }
   .kpi:nth-child(n+3){ border-top:1px solid var(--line) }
 
   .path__b{ grid-template-columns:30px 1fr auto; gap:var(--sp-3) }

@@ -8,7 +8,7 @@
   display:inline-flex; align-items:center; justify-content:center; gap:var(--sp-2);
   min-height:var(--tap); padding:0 var(--sp-4);
   border:1px solid var(--line-strong); border-radius:var(--r);
-  background:var(--ink-850); color:var(--tx);
+  background:var(--ink-850); color:var(--tx); box-shadow:var(--shadow);
   font-size:14px; font-weight:600; line-height:1; white-space:nowrap;
   transition:background var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease),
              transform var(--dur-1) var(--ease), color var(--dur-1) var(--ease);
@@ -26,7 +26,7 @@
 .btn--ok:hover:not(:disabled){ filter:brightness(1.08) }
 
 .btn--quiet{
-  min-height:32px; padding:0 var(--sp-2);
+  min-height:32px; padding:0 var(--sp-2); box-shadow:none;
   background:none; border-color:transparent; color:var(--tx-3);
   font-weight:500; font-size:var(--fs-sm);
 }
@@ -49,7 +49,14 @@
    действие от другого. Всё остальное группируется линиями. */
 .panel{
   background:var(--ink-900); border:1px solid var(--line); border-radius:var(--r);
-  padding:var(--sp-5);
+  box-shadow:var(--shadow); padding:var(--sp-5);
+}
+
+/* Поверхность-подложка для списков: на светлой теме белое поле с тенью,
+   на тёмной — ступень тона. Одна и та же роль, разный материал. */
+.surface{
+  background:var(--ink-900); border:1px solid var(--line);
+  border-radius:var(--r); box-shadow:var(--shadow); overflow:hidden;
 }
 .panel--tight{ padding:var(--sp-4) }
 
@@ -197,7 +204,8 @@ button.chip:hover{ border-color:var(--acc); color:var(--acc) }
   color:var(--tx); font-size:14.5px; font-weight:500; line-height:1.5;
   transition:border-color var(--dur-1) var(--ease), background var(--dur-1) var(--ease);
 }
-.option:hover:not(:disabled){ border-color:var(--tx-3); background:var(--ink-850) }
+.option{ box-shadow:var(--shadow) }
+.option:hover:not(:disabled){ border-color:var(--acc-line); background:var(--ink-850) }
 .option:active:not(:disabled){ transform:translateY(1px) }
 .option:disabled{ cursor:default }
 .option__k{
@@ -225,7 +233,8 @@ button.chip:hover{ border-color:var(--acc); color:var(--acc) }
 .code .f,.editor__hl .f{ color:var(--syn-fn) }
 .code .c,.editor__hl .c{ color:var(--syn-com); font-style:italic }
 
-.tbl-wrap{ overflow:auto; border:1px solid var(--line); border-radius:var(--r); max-height:42vh }
+.tbl-wrap{ overflow:auto; border:1px solid var(--line); border-radius:var(--r);
+  box-shadow:var(--shadow); max-height:42vh }
 .tbl{ border-collapse:collapse; width:100%; font-family:var(--mono); font-size:var(--fs-xs) }
 .tbl th{
   position:sticky; top:0; z-index:1; text-align:left; white-space:nowrap;
@@ -291,9 +300,9 @@ body.is-unit .toasts{ bottom:calc(88px + var(--safe-b)) }
 .dialog{
   padding:0; width:min(500px, calc(100vw - 32px));
   border:1px solid var(--line-strong); border-radius:var(--r);
-  background:var(--ink-900); color:var(--tx);
+  background:var(--ink-900); color:var(--tx); box-shadow:var(--shadow-lift);
 }
-.dialog::backdrop{ background:rgba(8,8,7,.72) }
+.dialog::backdrop{ background:rgba(10,14,24,.55) }
 .dialog__head{
   display:flex; align-items:center; gap:var(--sp-3);
   padding:var(--sp-4) var(--sp-5); border-bottom:1px solid var(--line);
