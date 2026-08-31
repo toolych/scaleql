@@ -1,57 +1,47 @@
-/* Карта курса. Главный вопрос экрана — «что мне делать сейчас».
-   Ответ стоит первым и выглядит как единственное крупное действие. */
+/* Программа курса. Экран отвечает на один вопрос: что делать сейчас.
+   Ответ стоит первым, курс под ним читается как оглавление учебника. */
 
 import { store, units, unitAt, doneIn, totalIn, unitDone, unlockAt, unlockThreshold,
-         currentUnitIdx, courseTotals, buildSteps, stepDone, firstUndoneStep,
+         currentUnitIdx, courseTotals, buildSteps, firstUndoneStep,
          isFirstRun, reviewDue, levelOf } from "../store.js";
-import { esc, el, delegate, toast, ring, nDays, plural } from "../ui.js";
-
-const stepLabel = s =>
-  s.kind === "task" ? "Задача: " + strip(s.main.prompt, 52)
-: s.kind === "quiz" ? "Вопрос: " + strip(s.main.q, 52)
-: "Короткая теория";
+import { esc, el, delegate, toast, meter, plural, pad2, note } from "../ui.js";
+import { icon } from "../icons.js";
 
 const strip = (html, n) => {
   const t = String(html).replace(/<[^>]+>/g, "");
   return t.length > n ? t.slice(0, n).trimEnd() + "…" : t;
 };
 
+const stepLabel = s =>
+  s.kind === "task" ? strip(s.main.prompt, 62)
+: s.kind === "quiz" ? strip(s.main.q, 62)
+: "теория";
+
 function heroContinue(){
   const i = currentUnitIdx(), u = unitAt(i);
   const steps = buildSteps(u);
   const si = firstUndoneStep(steps);
-  const s = steps[si];
   const st = store.state;
   const todayXp = st.history[store.course.today] || 0;
   const lv = levelOf(st.xp);
 
   return `<section class="hero">
-    <div class="hero__eyebrow">
-      <span class="badge badge--brand">Юнит ${i + 1} из ${units().length}</span>
-      ${st.streak.days ? `<span class="badge badge--warn">🔥 ${nDays(st.streak.days)} подряд</span>` : ""}
-      <span class="badge">Уровень ${lv.level}</span>
+    <div class="hero__k">
+      <span class="tag tag--acc">${pad2(i + 1)} / ${pad2(units().length)}</span>
+      <span class="tag">уровень ${lv.level}</span>
     </div>
-    <h1 class="hero__title">${esc(u.title)}</h1>
-    <p class="hero__sub">${esc(u.sub)}</p>
+    <h1 class="hero__t">${esc(u.title)}</h1>
+    <p class="hero__s">${esc(u.sub)}</p>
 
-    <div class="hero__meta">
-      <div class="hero__prog">
-        <div class="progress-row">
-          <span class="progress" role="progressbar" aria-valuenow="${doneIn(u)}" aria-valuemin="0"
-                aria-valuemax="${totalIn(u)}" aria-label="В юните сделано ${doneIn(u)} из ${totalIn(u)} заданий">
-            <i class="progress__fill" style="width:${Math.round(100 * doneIn(u) / (totalIn(u) || 1))}%"></i>
-          </span>
-          <span class="progress-row__num">${doneIn(u)} из ${totalIn(u)}</span>
-        </div>
-        <p class="hero__sub u-mt-3">
-          Дальше — шаг ${si + 1} из ${steps.length}. ${esc(stepLabel(s))}</p>
-      </div>
-      ${ring(todayXp, st.goal)}
+    <div class="hero__prog">
+      ${meter(doneIn(u), totalIn(u), {label:`В юните сделано ${doneIn(u)} из ${totalIn(u)} заданий`})}
+      <p class="hero__next">Шаг ${si + 1} из ${steps.length}: ${esc(stepLabel(steps[si]))}<br>
+        Сегодня ${todayXp} из ${st.goal} XP дневной цели</p>
     </div>
 
-    <div class="hero__foot">
-      <button class="btn btn--primary btn--lg" data-act="continue">Продолжить обучение</button>
-      <button class="btn btn--quiet" data-act="stats">Мой прогресс</button>
+    <div class="hero__acts">
+      <button class="btn btn--primary btn--lg" data-act="continue">Продолжить</button>
+      <button class="btn btn--quiet" data-act="stats">Прогресс</button>
     </div>
   </section>`;
 }
@@ -59,16 +49,20 @@ function heroContinue(){
 function heroWelcome(){
   const t = courseTotals();
   return `<section class="hero">
-    <div class="hero__eyebrow"><span class="badge badge--brand">Первый запуск</span></div>
-    <h1 class="hero__title">SQL для аналитика — на живой базе</h1>
-    <p class="hero__sub">${t.units} ${plural(t.units,"юнит","юнита","юнитов")}, ${t.tasks} ${plural(t.tasks,"задача","задачи","задач")}
-      и ${t.quizzes} ${plural(t.quizzes,"вопрос","вопроса","вопросов")} на данных сервиса по подписке.</p>
-    <ol class="hero__points">
-      <li><span class="hero__num">1</span><span><b>Короткие шаги.</b> В каждом — немного теории и сразу одно действие. Урок не читается стеной.</span></li>
-      <li><span class="hero__num">2</span><span><b>Настоящая база.</b> Запрос выполняется по-честному, результат сравнивается с эталоном.</span></li>
-      <li><span class="hero__num">3</span><span><b>Прогресс виден.</b> XP, серия дней и дневная цель — на вкладке «Прогресс».</span></li>
+    <h1 class="hero__t">SQL для аналитика,<br>на живой базе</h1>
+    <p class="hero__s">${t.units} ${plural(t.units,"юнит","юнита","юнитов")},
+      ${t.tasks} ${plural(t.tasks,"задача","задачи","задач")} и
+      ${t.quizzes} ${plural(t.quizzes,"вопрос","вопроса","вопросов")}
+      на данных сервиса по подписке за год.</p>
+    <ol class="steps-list">
+      <li><span class="num">01</span><span><b>Короткие шаги.</b>
+        Немного теории и сразу одно действие. Урок не читается стеной.</span></li>
+      <li><span class="num">02</span><span><b>Настоящая база.</b>
+        Запрос выполняется по-честному, результат сверяется с эталоном.</span></li>
+      <li><span class="num">03</span><span><b>Видимый прогресс.</b>
+        Опыт, серия дней и дневная цель на вкладке «Прогресс».</span></li>
     </ol>
-    <div class="hero__foot">
+    <div class="hero__acts">
       <button class="btn btn--primary btn--lg" data-act="continue">Начать первый урок</button>
     </div>
   </section>`;
@@ -77,54 +71,49 @@ function heroWelcome(){
 function heroDone(){
   const t = courseTotals();
   return `<section class="hero">
-    <div class="hero__eyebrow"><span class="badge badge--ok">Курс пройден</span></div>
-    <h1 class="hero__title">Все ${t.units} ${plural(t.units,"юнит","юнита","юнитов")} закрыты</h1>
-    <p class="hero__sub">${t.tasksDone} задач и ${t.quizzesDone} вопросов, ${store.state.xp} XP.
-      Дальше — повторение: без него оконные функции забываются за месяц.</p>
-    <div class="hero__foot">
+    <div class="hero__k"><span class="tag tag--ok">курс пройден</span></div>
+    <h1 class="hero__t">Все ${t.units} ${plural(t.units,"юнит","юнита","юнитов")} закрыты</h1>
+    <p class="hero__s">${t.tasksDone} задач и ${t.quizzesDone} вопросов, ${store.state.xp} XP.
+      Дальше только повторение: без него оконные функции забываются за месяц.</p>
+    <div class="hero__acts">
       <button class="btn btn--primary btn--lg" data-act="continue">Открыть юнит на повторение</button>
-      <button class="btn btn--quiet" data-act="stats">Мой прогресс</button>
+      <button class="btn btn--quiet" data-act="stats">Прогресс</button>
     </div>
   </section>`;
 }
 
-function reviewBanner(){
+function reviewNote(){
   const due = reviewDue();
   if(!due.length) return "";
   const first = due[0];
-  return `<div class="alert alert--warn u-mb-5">
-    <span class="alert__icon" aria-hidden="true">↻</span>
-    <div class="alert__body">
-      <b class="alert__title">Пора повторить</b>
-      «${esc(first.u.title)}» не открывался больше недели${due.length > 1 ? `, и ещё ${due.length - 1}` : ""}.
-      Десять минут сейчас дешевле, чем заново через месяц.
-      <div class="row">
-        <button class="btn btn--sm" data-act="unit" data-idx="${first.i}">Повторить «${esc(first.u.title)}»</button>
-      </div>
-    </div></div>`;
+  return `<div class="u-mb-7">${note({
+    kind:"acc", ic:"repeat", title:"Пора повторить",
+    text:`«${esc(first.u.title)}» не открывался больше недели` +
+         (due.length > 1 ? `, и ещё ${due.length - 1}` : "") +
+         `. Десять минут сейчас дешевле, чем заново через месяц.`,
+    actions:`<button class="btn btn--sm" data-act="unit" data-idx="${first.i}">Повторить</button>`,
+  })}</div>`;
 }
 
 function pathItem(u, i){
   const done = unitDone(u), open = unlockAt(i), cur = !done && open && i === currentUnitIdx();
   const d = doneIn(u), t = totalIn(u);
-  const cls = [done ? "is-done" : open ? (cur ? "is-current" : "") : "is-locked", i % 2 ? "is-alt" : ""]
-    .filter(Boolean).join(" ");
-  const face = done ? "✓" : open ? u.icon : "🔒";
-  const state = done ? "закрыт" : open ? "доступен" : `закрыт на замок, нужно ${unlockThreshold(i)} заданий в предыдущем юните`;
+  const cls = done ? "is-done" : cur ? "is-current" : open ? "" : "is-locked";
+  const state = done ? "закрыт" : open ? "доступен"
+    : `нужно ${unlockThreshold(i)} заданий в предыдущем юните`;
 
-  return `<li class="path__item ${cls}">
-    <button class="path__link" data-act="unit" data-idx="${i}" ${open ? "" : `aria-disabled="true"`}
+  return `<li class="path__i ${cls}">
+    <button class="path__b" data-act="unit" data-idx="${i}" ${open ? "" : `aria-disabled="true"`}
       aria-label="Юнит ${i + 1}. ${esc(u.title)}. ${esc(u.sub)}. Сделано ${d} из ${t}. ${state}">
-      <span class="path__dot" aria-hidden="true">${face}</span>
-      <span class="path__info">
-        <span class="path__name">${esc(u.title)}
-          ${cur ? `<span class="badge badge--brand">вы здесь</span>` : ""}</span>
-        <span class="path__topics">${esc(u.sub)}</span>
-        <span class="path__prog">
-          <span class="progress ${done ? "progress--ok" : open ? "" : "progress--muted"}">
-            <i class="progress__fill" style="width:${t ? Math.round(100 * d / t) : 0}%"></i></span>
-          <span class="path__count">${d} из ${t}</span>
-        </span>
+      <span class="path__n">${done ? icon("check", 14) : open ? pad2(i + 1) : icon("lock", 13)}</span>
+      <span class="path__body">
+        <span class="path__t">${esc(u.title)}</span>
+        <span class="path__s">${esc(u.sub)}</span>
+      </span>
+      <span class="path__m">
+        <span class="bar ${done ? "bar--ok" : open ? "" : "bar--mute"}">
+          <i style="width:${t ? Math.round(100 * d / t) : 0}%"></i></span>
+        <span class="num">${d}/${t}</span>
       </span>
     </button></li>`;
 }
@@ -133,14 +122,15 @@ export function renderMap(root, nav){
   const t = courseTotals();
   const hero = isFirstRun() ? heroWelcome() : t.unitsDone === t.units ? heroDone() : heroContinue();
 
-  const node = el(`<div class="view-scroll"><div class="map">
+  const node = el(`<div class="scroll"><div class="page">
     ${hero}
-    ${reviewBanner()}
-    <h2 class="section-title">Путь курса</h2>
-    <p class="map__lead">Юнитов закрыто ${t.unitsDone} из ${t.units} ·
-      задач решено ${t.tasksDone} из ${t.tasks} ·
-      вопросов ${t.quizzesDone} из ${t.quizzes}</p>
-    <ol class="path">${units().map(pathItem).join("")}</ol>
+    ${reviewNote()}
+    <div class="sec">
+      <h2 class="sec__h">Программа</h2>
+      <p class="sec__note">Юнитов закрыто ${t.unitsDone} из ${t.units},
+        задач решено ${t.tasksDone} из ${t.tasks}</p>
+      <ol class="path">${units().map(pathItem).join("")}</ol>
+    </div>
   </div></div>`);
 
   delegate(node, "click", "[data-act]", (e, btn) => {
@@ -151,7 +141,7 @@ export function renderMap(root, nav){
       const i = +btn.dataset.idx;
       if(!unlockAt(i)){
         const prev = unitAt(i - 1);
-        return toast(`Сначала закрой «${prev.title}» хотя бы на ${unlockThreshold(i)} из ${totalIn(prev)}`, "");
+        return toast(`Сначала закрой «${prev.title}» на ${unlockThreshold(i)} из ${totalIn(prev)}`);
       }
       return nav.openUnit(i);
     }

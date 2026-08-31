@@ -1,41 +1,44 @@
 /* ScaleQL · база: сброс, типографика, оформление учебного текста */
 
-@import url('../fonts/nunito.css');
+@import url('../fonts/fonts.css');
 
 *,*::before,*::after{ box-sizing:border-box }
 html{ height:100%; -webkit-text-size-adjust:100% }
 
 body{
-  min-height:100%; margin:0;
-  background:var(--c-bg); color:var(--c-tx);
-  font:var(--w-reg) var(--fs-body)/var(--lh-body) var(--font);
-  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
-  display:flex; flex-direction:column; height:100%; height:100dvh; overflow:hidden;
+  min-height:100%; height:100dvh; margin:0; overflow:hidden;
+  background:var(--ink-950); color:var(--tx);
+  font:400 var(--fs-body)/var(--lh-body) var(--font);
+  font-feature-settings:"ss01";
+  -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column;
 }
 
-h1,h2,h3,h4{ margin:0; font-weight:var(--w-black); letter-spacing:-.015em; line-height:var(--lh-head) }
+h1,h2,h3,h4{ margin:0; font-weight:700; line-height:var(--lh-head); letter-spacing:-.015em }
 h1{ font-size:var(--fs-h1) } h2{ font-size:var(--fs-h2) } h3{ font-size:var(--fs-h3) }
 p{ margin:0 0 var(--sp-3) }
-b,strong{ font-weight:var(--w-black) }
-a{ color:var(--brand-400) }
+b,strong{ font-weight:700 }
+a{ color:var(--acc); text-underline-offset:3px }
 img,svg{ max-width:100% }
-button,input,select,textarea{ font-family:inherit; font-size:inherit; color:inherit }
-button{ cursor:pointer }
+button,input,select,textarea{ font:inherit; color:inherit }
+button{ cursor:pointer; background:none; border:0; padding:0 }
 code,pre,.mono{ font-family:var(--mono) }
-ul,ol{ margin:0 0 var(--sp-3); padding-left:1.25em }
+ul,ol{ margin:0 0 var(--sp-3); padding-left:1.15em }
 li{ margin-bottom:var(--sp-1) }
 
+/* Цифры везде моноширинные и одной ширины: колонки чисел должны
+   стоять ровно, а счётчик XP — не дёргать соседей при росте. */
+.num{ font-family:var(--mono); font-variant-numeric:tabular-nums; font-weight:500 }
+
 :focus{ outline:none }
-:focus-visible{ box-shadow:var(--ring); border-radius:var(--r-sm) }
+:focus-visible{ box-shadow:var(--ring); border-radius:var(--r) }
 
-::selection{ background:var(--brand-tint-2); color:#fff }
+::selection{ background:var(--acc-soft); color:var(--tx) }
 
-/* полосы прокрутки — тише и тоньше */
-*{ scrollbar-width:thin; scrollbar-color:var(--c-line-hi) transparent }
+*{ scrollbar-width:thin; scrollbar-color:var(--line-strong) transparent }
 ::-webkit-scrollbar{ width:10px; height:10px }
-::-webkit-scrollbar-thumb{ background:var(--c-line-hi); border:3px solid transparent;
+::-webkit-scrollbar-thumb{ background:var(--line-strong); border:3px solid transparent;
   background-clip:content-box; border-radius:var(--r-full) }
-::-webkit-scrollbar-thumb:hover{ background:#3d4763; background-clip:content-box }
 ::-webkit-scrollbar-track{ background:transparent }
 
 .visually-hidden{
@@ -44,50 +47,54 @@ li{ margin-bottom:var(--sp-1) }
 }
 .skip-link{
   position:absolute; left:var(--sp-3); top:-100px; z-index:100;
-  background:var(--brand-600); color:#fff; font-weight:var(--w-black);
-  padding:var(--sp-3) var(--sp-4); border-radius:var(--r-md);
+  background:var(--acc-fill); color:var(--acc-ink); font-weight:600;
+  padding:var(--sp-3) var(--sp-4); border-radius:var(--r);
   transition:top var(--dur-2) var(--ease);
 }
 .skip-link:focus{ top:var(--sp-3) }
 
-/* ── учебный текст (HTML приходит из curriculum.py) ────── */
+.ic{ display:block; flex:0 0 auto }
+
+/* ── учебный текст (HTML приходит из curriculum.py) ──────── */
 .prose{ max-width:var(--measure) }
-.prose > p{ color:#dbe1ec; margin:0 0 var(--sp-4) }
+.prose > p{ color:var(--tx-2); margin:0 0 var(--sp-4); font-size:15.5px }
 .prose > p:last-child{ margin-bottom:0 }
+.prose b{ color:var(--tx) }
 .prose h3{ margin:var(--sp-6) 0 var(--sp-3); font-size:var(--fs-h3) }
 .prose code{
-  background:var(--c-elev-3); color:#bcd9ff; border:1px solid var(--c-line);
-  padding:1px 6px; border-radius:var(--r-sm); font-size:.87em; white-space:nowrap;
+  font-family:var(--mono); font-size:.86em; color:var(--tx);
+  background:var(--ink-850); border:1px solid var(--line);
+  padding:1px 5px; border-radius:var(--r-xs); white-space:nowrap;
 }
-/* правило-акцент */
+
+/* Правило урока: янтарная линейка слева, без заливки-плашки. */
 .prose p.rule, .prose .rule{
-  border-left:3px solid var(--brand-500);
-  background:var(--brand-tint);
-  border-radius:0 var(--r-md) var(--r-md) 0;
-  padding:var(--sp-3) var(--sp-4);
-  color:#d8e6ff; margin:0 0 var(--sp-4);
+  margin:0 0 var(--sp-4); padding:0 0 0 var(--sp-4);
+  border-left:2px solid var(--acc);
+  color:var(--tx); font-size:15.5px;
 }
-.prose p.rule code, .prose .rule code{ background:rgba(0,0,0,.28) }
-/* таблица-глоссарий */
-.prose table.g{ border-collapse:collapse; width:100%; margin:0 0 var(--sp-4) }
+
+/* Глоссарий: две колонки, разделитель только между строками. */
+.prose table.g{ border-collapse:collapse; width:100%; margin:0 0 var(--sp-5) }
 .prose table.g td{
-  border-top:1px solid var(--c-line); padding:var(--sp-2) var(--sp-2);
-  color:#dbe1ec; font-size:var(--fs-sm); line-height:1.5; vertical-align:top;
+  padding:var(--sp-2) 0; vertical-align:baseline;
+  color:var(--tx-2); font-size:var(--fs-sm); line-height:1.5;
 }
-.prose table.g tr:first-child td{ border-top:0 }
-.prose table.g td:first-child{ width:34%; white-space:nowrap }
-/* каркас конструкции */
+.prose table.g tr + tr td{ border-top:1px solid var(--line) }
+.prose table.g td:first-child{ width:34%; padding-right:var(--sp-4); white-space:nowrap }
+
 .prose pre.skel{
-  background:var(--c-code); border:1px solid var(--c-line); border-radius:var(--r-md);
-  padding:var(--sp-3) var(--sp-4); margin:0 0 var(--sp-4);
-  font-size:var(--fs-code); color:#9fb0c4; overflow-x:auto; line-height:1.6;
+  margin:0 0 var(--sp-5); padding:var(--sp-3) var(--sp-4);
+  background:var(--code-bg); border:1px solid var(--line); border-radius:var(--r);
+  font-family:var(--mono); font-size:var(--fs-code); line-height:1.65;
+  color:var(--tx-2); overflow-x:auto;
 }
-/* схема */
+
 .prose figure.dia{
-  margin:0 0 var(--sp-5); padding:var(--sp-4);
-  background:var(--c-elev-2); border:1px solid var(--c-line); border-radius:var(--r-lg);
+  margin:0 0 var(--sp-5); padding:var(--sp-4) 0 0;
+  border-top:1px solid var(--line);
 }
 .prose figure.dia svg{ width:100%; height:auto; display:block }
 .prose figure.dia figcaption{
-  margin-top:var(--sp-3); color:var(--c-tx-3); font-size:var(--fs-sm); line-height:1.5;
+  margin-top:var(--sp-3); color:var(--tx-3); font-size:var(--fs-sm); line-height:1.5;
 }

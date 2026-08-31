@@ -1,9 +1,10 @@
-/* Экран завершения юнита. Момент, ради которого возвращаются:
-   видно, что сделано, сколько заработано и куда идти дальше. */
+/* Итог юнита. Момент, ради которого возвращаются: видно, что сделано,
+   сколько заработано и куда идти дальше. */
 
 import { store, unitAt, units, tasksOf, quizzesOf, taskDone, quizDone,
          unitDone, doneIn, totalIn, unlockAt, buildSteps, courseTotals } from "../store.js";
-import { esc, el, delegate, plural } from "../ui.js";
+import { esc, el, delegate, plural, fillIcons } from "../ui.js";
+import { icon } from "../icons.js";
 
 const strip = h => String(h).replace(/<[^>]+>/g, "");
 
@@ -22,45 +23,42 @@ export function renderFinish(root, nav, unitIdx){
   const stepOf = id => steps.findIndex(s => s.main && s.main.id === id);
 
   const body = done ? `
-    <div class="finish__art" aria-hidden="true">✓</div>
-    <h1 class="finish__title">Юнит закрыт</h1>
-    <p class="finish__sub">${esc(u.title)} — ${esc(u.sub)}.
-      ${courseDone ? "И это был последний юнит курса." :
-        nextIdx >= 0 ? `Следующий: «${esc(unitAt(nextIdx).title)}».` : ""}</p>
-    <div class="finish__stats">
-      <div class="finish__stat"><b>${tasksOf(u).filter(t => taskDone(t.id)).length}</b>
-        <span>${plural(tasksOf(u).length, "задача", "задачи", "задач")} решено</span></div>
-      <div class="finish__stat"><b>${quizzesOf(u).filter(q => quizDone(q.id)).length}</b>
-        <span>вопросов пройдено</span></div>
-      <div class="finish__stat"><b>+${xp}</b><span>XP за юнит</span></div>
+    <div class="finish__k">${icon("trophy", 18)}<span class="caps">юнит закрыт</span></div>
+    <h1 class="finish__t">${esc(u.title)}</h1>
+    <p class="finish__s">${esc(u.sub)}. ${courseDone ? "И это был последний юнит курса."
+      : nextIdx >= 0 ? `Следующий: «${esc(unitAt(nextIdx).title)}».` : ""}</p>
+    <div class="finish__n">
+      <div><b>${tasksOf(u).filter(t => taskDone(t.id)).length}</b>
+        <span>${plural(tasksOf(u).length, "задача", "задачи", "задач")}</span></div>
+      <div><b>${quizzesOf(u).filter(q => quizDone(q.id)).length}</b><span>вопросов</span></div>
+      <div><b>+${xp}</b><span>опыта</span></div>
     </div>
-    <div class="finish__acts">
+    <div class="finish__a">
       ${nextIdx >= 0 && unlockAt(nextIdx)
         ? `<button class="btn btn--primary btn--lg" data-act="next" data-idx="${nextIdx}">
-             Следующий юнит: ${esc(unitAt(nextIdx).title)}</button>` : ""}
-      <button class="btn btn--ghost" data-act="again">Пройти юнит заново</button>
-      <button class="btn btn--quiet" data-act="map">К карте курса</button>
+             Дальше: ${esc(unitAt(nextIdx).title)}</button>` : ""}
+      <button class="btn" data-act="again">Пройти юнит заново</button>
+      <button class="btn btn--quiet" data-act="map">К программе курса</button>
     </div>`
   : `
-    <div class="finish__art finish__art--pending" aria-hidden="true">◐</div>
-    <h1 class="finish__title">Шаги кончились, задачи — нет</h1>
-    <p class="finish__sub">В юните «${esc(u.title)}» осталось
-      ${left.length} ${plural(left.length, "задание", "задания", "заданий")}.
-      Юнит засчитается, когда закроешь их — или хотя бы ${Math.ceil(totalIn(u) * 0.7)} из ${totalIn(u)},
-      чтобы открыть следующий.</p>
-    <div class="finish__stats">
-      <div class="finish__stat"><b>${doneIn(u)} из ${totalIn(u)}</b><span>сделано</span></div>
-      <div class="finish__stat"><b>+${xp}</b><span>XP набрано</span></div>
+    <div class="finish__k">${icon("tasks", 18)}<span class="caps">шаги кончились</span></div>
+    <h1 class="finish__t">Осталось ${left.length}
+      ${plural(left.length, "задание", "задания", "заданий")}</h1>
+    <p class="finish__s">Юнит «${esc(u.title)}» засчитается, когда закроешь их. Чтобы открыть
+      следующий, хватит ${Math.ceil(totalIn(u) * 0.7)} из ${totalIn(u)}.</p>
+    <div class="finish__n">
+      <div><b>${doneIn(u)}/${totalIn(u)}</b><span>сделано</span></div>
+      <div><b>+${xp}</b><span>опыта набрано</span></div>
     </div>
-    <div class="finish__acts">
-      ${left.slice(0, 3).map(b => `<button class="btn btn--ghost" data-act="step" data-i="${stepOf(b.id)}">
-        ${b.type === "task" ? "Задача" : "Вопрос"}: ${esc(strip(b.prompt || b.q).slice(0, 46))}…</button>`).join("")}
-      <button class="btn btn--quiet" data-act="map">К карте курса</button>
+    <div class="finish__a">
+      ${left.slice(0, 3).map(b => `<button class="btn" data-act="step" data-i="${stepOf(b.id)}">
+        ${b.type === "task" ? "Задача" : "Вопрос"}: ${esc(strip(b.prompt || b.q).slice(0, 42))}…</button>`).join("")}
+      <button class="btn btn--quiet" data-act="map">К программе курса</button>
     </div>`;
 
-  const node = el(`<div class="view-scroll"><div class="finish">
-    <section class="finish__card ${done ? "" : "finish__card--pending"}">${body}</section>
-  </div></div>`);
+  const node = el(`<div class="scroll"><div class="finish ${done ? "" : "finish--part"}">
+    <section class="finish__in">${body}</section></div></div>`);
+  fillIcons(node);
 
   delegate(node, "click", "[data-act]", (e, btn) => {
     switch(btn.dataset.act){

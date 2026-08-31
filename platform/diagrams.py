@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 """Схемы к урокам. Инлайновый SVG под тёмную тему платформы."""
 
-C = dict(bg="#11161d", box="#1b212a", line="#2b3441", tx="#dfe5ee", dim="#8b95a5",
-         acc="#6cc4ff", kw="#7dd3fc", ok="#5fd08a", warn="#f0b46c", red="#ff8f8f", str_="#a5e075")
+# Цвета берутся из токенов темы: SVG вставляется в документ инлайном,
+# поэтому var() работает и схема сама переключается вместе с оформлением.
+C = dict(bad_bg="var(--bad-soft)", bad_line="var(--bad-line)",
+         ok_bg="var(--ok-soft)", ok_line="var(--ok-line)",
+         acc_bg="var(--acc-soft)", acc_line="var(--acc-line)",
+         bg="var(--ink-950)", box="var(--ink-900)", line="var(--line)",
+         tx="var(--tx)", dim="var(--tx-3)", acc="var(--acc)", kw="var(--syn-kw)",
+         ok="var(--ok)", warn="var(--acc)", red="var(--bad)", str_="var(--syn-str)")
 
 def _wrap(inner, w, h, caption=""):
     return (f'<figure class="dia"><svg viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg" '
@@ -10,7 +16,7 @@ def _wrap(inner, w, h, caption=""):
             + (f'<figcaption>{caption}</figcaption>' if caption else "") + '</figure>')
 
 def _row(x, y, w, h, fill, stroke, text, tcolor, size=13, mono=True, anchor="start", tx=None):
-    f = "ui-monospace,Menlo,monospace" if mono else "-apple-system,Segoe UI,sans-serif"
+    f = "var(--mono)" if mono else "var(--font)"
     tx = x + 10 if tx is None else tx
     return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="6" fill="{fill}" stroke="{stroke}"/>'
             f'<text x="{tx}" y="{y+h/2+4.5}" fill="{tcolor}" font-size="{size}" '
@@ -24,7 +30,7 @@ def _arrow(x1, y1, x2, y2, color=None):
             f'marker-end="url(#a{int(x1)}{int(y1)})"/>')
 
 def _label(x, y, text, color=None, size=12.5, anchor="start", mono=False, weight="normal"):
-    f = "ui-monospace,Menlo,monospace" if mono else "-apple-system,Segoe UI,sans-serif"
+    f = "var(--mono)" if mono else "var(--font)"
     return (f'<text x="{x}" y="{y}" fill="{color or C["dim"]}" font-size="{size}" font-family="{f}" '
             f'text-anchor="{anchor}" font-weight="{weight}">{text}</text>')
 
@@ -53,17 +59,17 @@ def where_filter():
     y = 26
     for txt, keep in data:
         col = C["red"] if keep else C["dim"]
-        fill = "#221a1a" if keep else C["box"]
-        p.append(_row(14, y, 170, 26, fill, C["line"] if not keep else "#4a2f2f", txt, col, 12.5))
+        fill = C["bad_bg"] if keep else C["box"]
+        p.append(_row(14, y, 170, 26, fill, C["line"] if not keep else C["bad_line"], txt, col, 12.5))
         y += 31
-    p.append(f'<rect x="222" y="60" width="176" height="62" rx="8" fill="#141c25" stroke="{C["acc"]}"/>')
+    p.append(f'<rect x="222" y="60" width="176" height="62" rx="8" fill="{C["acc_bg"]}" stroke="{C["acc"]}"/>')
     p.append(_label(310, 86, "WHERE", C["kw"], 13.5, "middle", mono=True, weight="700"))
     p.append(_label(310, 106, "status = 'failed'", C["str_"], 12.5, "middle", mono=True))
     p.append(_arrow(190, 91, 218, 91))
     p.append(_arrow(402, 91, 432, 91))
     p.append(_label(440, 16, "в ответ попали только они", C["dim"], 12))
-    p.append(_row(440, 66, 166, 26, "#221a1a", "#4a2f2f", "990  failed", C["red"], 12.5))
-    p.append(_row(440, 97, 166, 26, "#221a1a", "#4a2f2f", "990  failed", C["red"], 12.5))
+    p.append(_row(440, 66, 166, 26, C["bad_bg"], C["bad_line"], "990  failed", C["red"], 12.5))
+    p.append(_row(440, 97, 166, 26, C["bad_bg"], C["bad_line"], "990  failed", C["red"], 12.5))
     return _wrap("".join(p), 620, 218,
                  "WHERE — сито. Он не считает и не меняет данные, только решает, какие строки пройдут дальше.")
 
@@ -84,11 +90,11 @@ def groupby():
     p.append(_label(200, 44, "кучка success", C["ok"], 11.5))
     yy = 52
     for am in ["990", "990", "990", "9480", "990", "990", "990"]:
-        p.append(_row(200, yy, 128, 18, "#16231b", "#2c4433", am, C["tx"], 11))
+        p.append(_row(200, yy, 128, 18, C["ok_bg"], C["ok_line"], am, C["tx"], 11))
         yy += 21
     p.append(f'<rect x="352" y="24" width="150" height="60" rx="8" fill="none" stroke="{C["line"]}" stroke-dasharray="4 4"/>')
     p.append(_label(362, 44, "кучка failed", C["warn"], 11.5))
-    p.append(_row(362, 52, 128, 18, "#231e16", "#443a2c", "990", C["tx"], 11))
+    p.append(_row(362, 52, 128, 18, C["acc_bg"], C["acc_line"], "990", C["tx"], 11))
     p.append(_arrow(510, 60, 538, 60))
     p.append(_label(520, 130, "", C["dim"]))
     p.append(_arrow(510, 120, 538, 120))
@@ -132,7 +138,7 @@ def join():
     p.append(_arrow(198, 100, 300, 100))
     p.append(_label(320, 14, "результат: 3 строки, пользователь продублирован", C["dim"], 12))
     for i, a in enumerate(["74  social  RU   990  success", "74  social  RU   990  failed", "74  social  RU   990  success"]):
-        p.append(_row(320, 24 + i * 30, 288, 26, "#1a2029", "#33404f", a, C["tx"], 12))
+        p.append(_row(320, 24 + i * 30, 288, 26, C["box"], C["line"], a, C["tx"], 12))
     p.append(_label(320, 136, "COUNT(*) здесь посчитает платежи, а не людей", C["red"], 12))
     return _wrap("".join(p), 620, 190,
                  "Соединение размножает строки: на одного пользователя приходится столько строк, сколько у него платежей. Из-за этого COUNT(*) после JOIN почти всегда считает не то, что кажется.")

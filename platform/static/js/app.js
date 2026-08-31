@@ -1,18 +1,17 @@
 /* Точка входа: загрузка курса, маршрутизация, шапка, горячие клавиши. */
 
-import { store, setState, onState, currentUnitIdx, levelOf, isFirstRun } from "./store.js";
+import { store, setState, onState, currentUnitIdx, levelOf } from "./store.js";
 import * as api from "./api.js";
-import { $, $$, el, toast, bump, skeletonMap, emptyState, nDays } from "./ui.js";
+import { $, $$, el, bump, skeletonPage, emptyState, nDays, fillIcons } from "./ui.js";
 import { renderMap }    from "./views/map.js";
 import { renderStats }  from "./views/stats.js";
 import { renderFinish } from "./views/finish.js";
 import { renderUnit, unitKeydown } from "./views/unit.js";
-import { openSettings } from "./views/settings.js";
+import { openSettings, applyTheme, readTheme } from "./views/settings.js";
 
 const root = $("#view");
-let live = null;   // активный экран урока — чтобы корректно его закрыть
+let live = null;   // активный экран урока: его надо корректно закрыть
 
-/* ── шапка ───────────────────────────────────────────────── */
 function paintHud(prevXp){
   const st = store.state;
   if(!st) return;
@@ -21,7 +20,7 @@ function paintHud(prevXp){
   streak.title = st.streak.days ? `${nDays(st.streak.days)} подряд` : "Серия ещё не начата";
   xp.querySelector("b").textContent = st.xp;
   const lv = levelOf(st.xp);
-  xp.title = `Уровень ${lv.level}${lv.need ? ` · до следующего ${lv.need} XP` : ""}`;
+  xp.title = `Уровень ${lv.level}${lv.need ? `, до следующего ${lv.need} XP` : ""}`;
   if(prevXp != null && st.xp > prevXp) bump(xp);
 }
 function paintNav(){
@@ -29,7 +28,6 @@ function paintNav(){
     b.setAttribute("aria-current", b.dataset.view === store.view ? "page" : "false"));
 }
 
-/* ── маршрутизация ───────────────────────────────────────── */
 const nav = {
   go(view){
     if(view === "settings") return openSettings();   // диалог поверх текущего экрана
@@ -38,6 +36,7 @@ const nav = {
     paintNav();
     if(view === "stats") renderStats(root, nav);
     else renderMap(root, nav);
+    fillIcons(root);
     root.focus({preventScroll:true});
   },
   openUnit(i, step){
@@ -56,8 +55,9 @@ const nav = {
   settings: openSettings,
 };
 
-/* ── старт ───────────────────────────────────────────────── */
 function bindShell(){
+  applyTheme(readTheme());
+  fillIcons(document);
   $("#brandBtn").addEventListener("click", () => nav.go("map"));
   $("#settingsBtn").addEventListener("click", openSettings);
   $$("[data-view]").forEach(b => b.addEventListener("click", () => nav.go(b.dataset.view)));
@@ -69,15 +69,16 @@ function bindShell(){
 }
 
 function failScreen(message){
-  const node = el(`<div class="view-scroll">${emptyState({
-    art:"⚡", title:"Тренажёр не отвечает", text:message,
-    action:`<button class="btn btn--primary" data-act="retry">Попробовать снова</button>`})}</div>`);
+  const node = el(`<div class="scroll"><div class="page">${emptyState({
+    ic:"warn", title:"Тренажёр не отвечает", text:message,
+    action:`<button class="btn btn--primary" data-act="retry">Попробовать снова</button>`})}</div></div>`);
   node.addEventListener("click", e => { if(e.target.closest('[data-act="retry"]')) boot(); });
   root.replaceChildren(node);
+  fillIcons(root);
 }
 
 async function boot(){
-  root.replaceChildren(el(skeletonMap()));
+  root.replaceChildren(el(skeletonPage()));
   const data = await api.getCourse();
   if(data.netError) return failScreen(data.message);
 
@@ -85,10 +86,7 @@ async function boot(){
   store.state = data.state;
   store.unitIdx = currentUnitIdx();
   paintHud();
-  paintNav();
-
-  if(isFirstRun()) nav.go("map");
-  else nav.go("map");
+  nav.go("map");
 }
 
 bindShell();

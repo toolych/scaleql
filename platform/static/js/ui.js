@@ -1,12 +1,13 @@
 /* Мелкие переиспользуемые кирпичи интерфейса. */
 
+import { icon } from "./icons.js";
+
 export const $  = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 
 export const esc = s => String(s ?? "")
   .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
-/** HTML-строка → элемент. */
 export function el(html){
   const t = document.createElement("template");
   t.innerHTML = html.trim();
@@ -18,6 +19,15 @@ export function delegate(root, event, selector, handler){
   root.addEventListener(event, e => {
     const target = e.target.closest(selector);
     if(target && root.contains(target)) handler(e, target);
+  });
+}
+
+/** Расставляет иконки по разметке: <span data-icon="flame" data-size="15">. */
+export function fillIcons(root = document){
+  $$("[data-icon]", root).forEach(node => {
+    if(node.dataset.filled) return;
+    node.innerHTML = icon(node.dataset.icon, +(node.dataset.size || 18));
+    node.dataset.filled = "1";
   });
 }
 
@@ -34,84 +44,85 @@ export const paint = src => esc(src).replace(SYNTAX, (m, comment, str, fn, kw) =
   kw      ? `<span class="k">${m}</span>` : `<span class="n">${m}</span>`);
 
 /* ── прогресс ────────────────────────────────────────────── */
-/** Полоса с числом рядом: «18 из 25», а не голые проценты. */
-export function progressRow(done, total, {mod = "", unit = "", id = ""} = {}){
+/** Полоса и число рядом. Всегда со знаменателем: «18 / 25», не «72%». */
+export function meter(done, total, {mod = "", label = ""} = {}){
   const pct = total ? Math.round(100 * done / total) : 0;
-  return `<div class="progress-row">
-    <div class="progress ${mod}" role="progressbar" ${id ? `id="${id}"` : ""}
-         aria-valuenow="${done}" aria-valuemin="0" aria-valuemax="${total}"
-         aria-label="Готово ${done} из ${total}${unit ? " " + unit : ""}">
-      <i class="progress__fill" style="width:${pct}%"></i></div>
-    <span class="progress-row__num">${done} из ${total}${unit ? " " + unit : ""}</span>
-  </div>`;
+  return `<span class="meter">
+    <span class="bar ${mod}" role="progressbar" aria-valuenow="${done}" aria-valuemin="0"
+      aria-valuemax="${total}" aria-label="${label || `Готово ${done} из ${total}`}">
+      <i style="width:${pct}%"></i></span>
+    <span class="meter__n">${done} / ${total}</span>
+  </span>`;
 }
 
 export function ring(value, goal){
   const pct = goal ? Math.min(1, value / goal) : 0;
-  const r = 32, c = 2 * Math.PI * r;
-  return `<div class="ring ${pct >= 1 ? "is-done" : ""}" role="img"
+  const r = 27, c = 2 * Math.PI * r;
+  return `<span class="ring ${pct >= 1 ? "is-done" : ""}" role="img"
       aria-label="Дневная цель: ${value} из ${goal} XP">
-    <svg viewBox="0 0 76 76" aria-hidden="true">
-      <circle class="ring__track" cx="38" cy="38" r="${r}"></circle>
-      <circle class="ring__bar" cx="38" cy="38" r="${r}"
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <circle class="ring__track" cx="32" cy="32" r="${r}"></circle>
+      <circle class="ring__bar" cx="32" cy="32" r="${r}"
         stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${(c * (1 - pct)).toFixed(1)}"></circle>
     </svg>
-    <span class="ring__val" aria-hidden="true">${value}<small>из ${goal}</small></span>
-  </div>`;
+    <span class="ring__val" aria-hidden="true">${value}<small>/${goal}</small></span>
+  </span>`;
 }
 
-/* ── таблица результата запроса ──────────────────────────── */
+/* ── результат запроса ───────────────────────────────────── */
 export function resultTable(res){
   if(!res || !res.columns) return "";
   if(!res.rows.length){
-    return alert_({kind:"info", icon:"◌", title:"Строк не вернулось",
+    return note({kind:"", ic:"info", title:"Строк не вернулось",
       text:"Запрос отработал, но под условия не подошла ни одна строка. Обычно виноват слишком узкий фильтр."});
   }
   const shown = res.rows.slice(0, 150);
   const total = res.total ?? res.rows.length;
   return `<div>
-    <div class="table-wrap"><table class="table">
+    <div class="tbl-wrap"><table class="tbl">
       <thead><tr>${res.columns.map(c => `<th scope="col">${esc(c)}</th>`).join("")}</tr></thead>
       <tbody>${shown.map(row => "<tr>" + row.map(v =>
         `<td>${v === null ? `<span class="null">NULL</span>` : esc(v)}</td>`).join("") + "</tr>").join("")}
       </tbody></table></div>
-    <p class="table-note">${shown.length < total
-      ? `Показаны первые ${shown.length} строк из ${total}.`
-      : `Строк: ${total}.`}</p></div>`;
+    <p class="tbl-note">${shown.length < total
+      ? `Первые ${shown.length} строк из ${total}`
+      : `Строк: ${total}`}</p></div>`;
 }
 
 /* ── сообщения ───────────────────────────────────────────── */
-export function alert_({kind = "info", icon = "", title = "", text = "", raw = "", actions = ""}){
-  return `<div class="alert alert--${kind}">
-    ${icon ? `<span class="alert__icon" aria-hidden="true">${icon}</span>` : ""}
-    <div class="alert__body">
-      ${title ? `<b class="alert__title">${title}</b>` : ""}
+export function note({kind = "", ic = "info", title = "", text = "", raw = "", actions = ""}){
+  return `<div class="note ${kind ? "note--" + kind : ""}">
+    ${icon(ic, 16)}
+    <div class="note__b">
+      ${title ? `<b class="note__t">${title}</b>` : ""}
       ${text}
       ${raw ? `<details><summary>Что сказала база</summary><pre>${esc(raw)}</pre></details>` : ""}
-      ${actions ? `<div class="row u-mt-3">${actions}</div>` : ""}
+      ${actions ? `<div class="row" style="margin-top:var(--sp-3)">${actions}</div>` : ""}
     </div></div>`;
 }
 
-export const emptyState = ({art = "◌", title, text, action = ""}) => `
+export const emptyState = ({ic = "info", title, text, action = ""}) => `
   <div class="state">
-    <div class="state__art" aria-hidden="true">${art}</div>
-    <p class="state__title">${title}</p>
-    <p class="state__text">${text}</p>
+    ${icon(ic, 22)}
+    <p class="state__t">${title}</p>
+    <p class="state__x">${text}</p>
     ${action}
   </div>`;
 
-export const skeletonMap = () => `<div class="map" aria-busy="true" aria-label="Курс загружается">
-  <div class="skeleton skeleton--title"></div>
-  <div class="skeleton" style="height:150px;border-radius:var(--r-xl);margin-bottom:var(--sp-7)"></div>
-  ${"<div class='skeleton skeleton--node'></div>".repeat(4)}</div>`;
+export const skeletonPage = () => `<div class="scroll"><div class="page" aria-busy="true"
+    aria-label="Курс загружается">
+  <div class="skel skel--head"></div>
+  <div class="skel skel--line" style="width:70%"></div>
+  <div class="skel skel--line" style="width:40%;margin-bottom:var(--sp-7)"></div>
+  ${'<div class="skel skel--row"></div>'.repeat(6)}</div></div>`;
 
 /* ── тосты ───────────────────────────────────────────────── */
-export function toast(text, kind = ""){
+export function toast(text, kind = "", ic = ""){
   const box = $("#toasts");
   if(!box) return;
-  const t = el(`<div class="toast ${kind ? "toast--" + kind : ""}">${text}</div>`);
+  const t = el(`<div class="toast ${kind ? "toast--" + kind : ""}">${ic ? icon(ic, 15) : ""}${text}</div>`);
   box.appendChild(t);
-  setTimeout(() => { t.classList.add("is-out"); setTimeout(() => t.remove(), 260); }, 2100);
+  setTimeout(() => { t.classList.add("is-out"); setTimeout(() => t.remove(), 220); }, 2000);
 }
 
 /* ── микровзаимодействия ─────────────────────────────────── */
@@ -122,23 +133,24 @@ export function bump(node){
   node.classList.add("is-bumped");
 }
 
-/** Короткий салют на закрытие юнита. Отключается через prefers-reduced-motion. */
+/** Короткий салют на закрытие юнита. Гасится настройкой ОС. */
 export function confetti(){
   if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const colors = ["#2f80ff","#22b567","#ffbe5c","#5b9cff","#4bd68b"];
+  const css = getComputedStyle(document.documentElement);
+  const colors = [css.getPropertyValue("--acc"), css.getPropertyValue("--ok"), css.getPropertyValue("--tx-2")];
   const box = el(`<div class="confetti" aria-hidden="true"></div>`);
-  for(let i = 0; i < 26; i++){
+  for(let i = 0; i < 20; i++){
     const p = document.createElement("i");
-    p.style.left = (50 + (Math.random() - .5) * 26) + "%";
-    p.style.background = colors[i % colors.length];
-    p.style.setProperty("--dx", ((Math.random() - .5) * 560).toFixed(0) + "px");
-    p.style.setProperty("--dy", (140 + Math.random() * 420).toFixed(0) + "px");
-    p.style.setProperty("--rot", (Math.random() * 720 - 360).toFixed(0) + "deg");
-    p.style.setProperty("--dur-fly", (900 + Math.random() * 700).toFixed(0) + "ms");
+    p.style.left = (50 + (Math.random() - .5) * 22) + "%";
+    p.style.background = colors[i % colors.length].trim();
+    p.style.setProperty("--dx", ((Math.random() - .5) * 480).toFixed(0) + "px");
+    p.style.setProperty("--dy", (120 + Math.random() * 360).toFixed(0) + "px");
+    p.style.setProperty("--rot", (Math.random() * 540 - 270).toFixed(0) + "deg");
+    p.style.setProperty("--fly", (800 + Math.random() * 500).toFixed(0) + "ms");
     box.appendChild(p);
   }
   document.body.appendChild(box);
-  setTimeout(() => box.remove(), 1800);
+  setTimeout(() => box.remove(), 1500);
 }
 
 /* ── склонение ───────────────────────────────────────────── */
@@ -150,3 +162,4 @@ export function plural(n, one, few, many){
   return many;
 }
 export const nDays = n => `${n} ${plural(n, "день", "дня", "дней")}`;
+export const pad2 = n => String(n).padStart(2, "0");
